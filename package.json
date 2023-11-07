@@ -1,0 +1,43 @@
+{
+  "name": "questbook-ipfs-backend",
+  "version": "1.0.0",
+  "description": "questbook ipfs backend",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "sh -c 'while true; do node dist/index.js; done'",
+    "build": "tsc",
+    "watch-tsc": "tsc -w",
+    "deploy": "node dist/index.js",
+    "watch-deploy": "nodemon dist/index.js",
+    "dev": "concurrently \"npm run watch-tsc\" \"npm run watch-deploy\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1489.0",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "formidable": "^3.5.1",
+    "mongodb": "^6.2.0",
+    "mongoose": "^7.6.3",
+    "morgan": "^1.10.0",
+    "pino": "^8.16.1",
+    "typescript": "^5.2.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.15",
+    "@types/express": "^4.17.20",
+    "@types/formidable": "^3.4.4",
+    "@types/morgan": "^1.9.7",
+    "@types/uuid": "^9.0.6",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.52.0",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.3",
+    "ts-node": "^10.9.1"
+  }
+}
