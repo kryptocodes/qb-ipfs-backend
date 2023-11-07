@@ -1,11 +1,12 @@
-import formidable from 'formidable';
+import { Request, Response, NextFunction } from 'express';
+import formidable, { Fields, Files } from 'formidable';
 
 // resuable wrapper for formidable
 
-export const parseForm = (req: any, res: any, next: any) => {
+export const parseForm = (req: Request | any, res: Response, next: NextFunction) => {
     const form = formidable({ multiples: false });
     try{
-    form.parse(req, (err: any, fields: any, files: any) => {
+     form.parse(req, (err: Error | null, fields: Fields, files: Files) => {
         if (err) {
         return res.status(500).json({
             message: 'Error',

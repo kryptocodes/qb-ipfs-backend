@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { Ipfs } from "../models/ipfs";
 import logger from "../utils/logger";
+import { fetchData } from "../services"
 
 
 /* getData: fetch data using hash 
@@ -16,15 +16,8 @@ const getData = async (req: Request | any, res: Response): Promise<Response | vo
                 message: "hash is required"
             })
         }
-        const ipfs = await Ipfs.findOne({
-            hash
-        })
-        if(!ipfs){
-            return res.status(404).json({
-                status: "404",
-                message: "hash not found"
-            })
-        }
+        const ipfs = await fetchData(hash);
+        if(!ipfs) return res.status(400).json({ status: "400", message: "hash not found" })
         if(typeof ipfs?.data === "string" && ipfs?.data?.startsWith("https://")){
             return res.redirect(ipfs?.data)
         } else {
