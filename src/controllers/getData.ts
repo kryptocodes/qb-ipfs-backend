@@ -21,7 +21,7 @@ const getData = async (req: Request | any, res: Response): Promise<Response | vo
         if(typeof ipfs?.data === "string" && ipfs?.data?.startsWith("https://")){
             return res.redirect(ipfs?.data)
         } else {
-            return res.status(200).json(ipfs?.data)
+            return res.status(200).send(ipfs?.data)
         }
     }
     catch(error){

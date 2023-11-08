@@ -12,10 +12,12 @@ upload: store json in mongodb
 */
 
 const uploadToDB = async (req: Request, res: Response) => {
+    
     try {
-        const { data,hash } = req.body;
+        let { data,hash } = req.body;
         if (!data) return res.status(400).json({ status: "400", message: "data is required" })
         //if hash is provided, check if it already exists 
+         data = JSON?.parse(data) ? JSON?.parse(data) : data
         if(hash && hash.length > 0){
             const duplicateCheck = await findHash(hash);
             if(duplicateCheck){
@@ -29,6 +31,7 @@ const uploadToDB = async (req: Request, res: Response) => {
                 message: "data stored successfully",
                 hash: uploadToDB?.hash,
             })
+           
     }
     catch (error) {
         logger.error(error)
