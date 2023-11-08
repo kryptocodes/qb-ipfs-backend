@@ -11,9 +11,11 @@ import cors from 'cors';
 
 import routes from './routes'
 import './db'
+import logger from "./utils/logger";
 
 const app = express()
-const port = process.env.PORT || 5000
+const port = process.env.PORT
+
 app.use(cors())
 
 
@@ -30,6 +32,9 @@ app.get('/health/check', (_, res) => {
 
 app.use("/",routes)
 
+
 app.listen(port, () => {
-console.log(`QB app listening on port ${port}`)
+logger.info(`QB app listening on port ${port}`)
 })
+
+export default app;

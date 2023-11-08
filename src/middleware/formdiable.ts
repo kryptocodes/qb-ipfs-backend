@@ -18,7 +18,7 @@ export const parseForm = (req: Request | any, res: Response, next: NextFunction)
         });
         }
         req.body = fields;
-        req.file = files;
+        req.files = files;
         next();
     });
 } catch(error){
