@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
-import { s3Upload } from '../utils/s3Uploader';
+import { uploadBlob } from '../utils/s3Uploader';
 import logger from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
 import { putData } from '../services';
 import { errorHandler } from '../handlers/errorHandler';
 
+import fs from "fs";
 
 const uploadHandler = async (req: Request | any, res: Response) => {
     try{
@@ -58,8 +59,13 @@ const uploadFile = async (req: Request | any, res: Response) => {
     try {
         const { file } = req.files;
        if(!file[0]) errorHandler(res,400,"file is required")
+            const fileStream = fs.createReadStream(file[0].filepath);
+            // get the file extension from the mimetype
+            const contentType = file?.mimetype?.split("/")[1];
+            const fileName = `${uuidv4()}.${contentType}`
             // upload file to s3
-            const cid: any = await s3Upload(file[0])
+            const cid: any = await uploadBlob(fileStream,fileName)
+
             // get location from cid
             if (!cid || !cid.Location) { errorHandler(res,400,"upload failed") }
             // store cid in db
