@@ -16,7 +16,7 @@ const ipfsSchema = new Schema<IIpfs>
     },
     data: {
         type: Schema.Types.Mixed,
-        required: false,
+        required: true,
         default: null,
     },
 }, {
