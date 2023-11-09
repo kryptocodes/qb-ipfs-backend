@@ -3,7 +3,7 @@ import logger from "../utils/logger";
 import { fetchData } from "../services"
 import { errorHandler } from "../handlers/errorHandler";
 import { checkHashExist } from "./loadToDb";
-
+const bucketURL = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/`
 
 const sendFile = async(res:Response,url:string) => {
     try{
@@ -19,6 +19,7 @@ const sendFile = async(res:Response,url:string) => {
     }
 }
 
+
 /* getData: fetch data using hash 
 @params: hash
 @returns: data
@@ -32,13 +33,14 @@ const getData = async (req: Request | any, res: Response): Promise<Response | vo
         const ipfs = await fetchData(hash);
 
         if(!ipfs) {
+          
             // Edge case load data if not found in db but exist in ipfs
             const check:any = await checkHashExist(hash);
             if(!check) return errorHandler(res,404,"hash not found")
-            return typeof check?.data === "string" && check?.data?.startsWith("https://qbipfstest.s3.ap-southeast-1.amazonaws.com/") ?
+            return typeof check?.data === "string" && check?.data?.startsWith(bucketURL) ?
             sendFile(res,check?.data) : res.status(200).send(check?.data)
         }
-        if(typeof ipfs?.data === "string" && ipfs?.data?.startsWith("https://qbipfstest.s3.ap-southeast-1.amazonaws.com/")){
+        if(typeof ipfs?.data === "string" && ipfs?.data?.startsWith(bucketURL)){
             return sendFile(res,ipfs?.data)
         } else {
             return res.status(200).send(ipfs?.data)

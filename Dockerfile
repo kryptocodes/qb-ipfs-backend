@@ -23,4 +23,4 @@ RUN yarn build
 EXPOSE 5000
 
 # Start your Node.js application
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/server.js"]
