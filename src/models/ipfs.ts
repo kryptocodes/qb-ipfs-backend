@@ -12,6 +12,7 @@ const ipfsSchema = new Schema<IIpfs>
         type: String,
         default: () => uuidv4(),
         index: true,
+        unique: true,
     },
     data: {
         type: Schema.Types.Mixed,

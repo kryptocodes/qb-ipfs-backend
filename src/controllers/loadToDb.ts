@@ -12,7 +12,6 @@ upload: store json in mongodb
 */
 
 const uploadToDB = async (req: Request, res: Response) => {
-    
     try {
         let { data,hash } = req.body;
         if (!data) return res.status(400).json({ status: "400", message: "data is required" })
@@ -34,7 +33,7 @@ const uploadToDB = async (req: Request, res: Response) => {
            
     }
     catch (error) {
-        logger.error(error)
+       console.log(error)
         return res.status(500).json({
             status: "500",
             message: error?.message || "internal server error"
@@ -43,9 +42,8 @@ const uploadToDB = async (req: Request, res: Response) => {
 }
 
 const uploadFiletoDB = async (req: Request | any, res: Response) => {
-    console.log(req.file,req.body)
     try {
-        const { data } = req.file;
+        const { data } = req.files;
         const { hash } = req.body;
        if(!data) return res.status(400).json({ status: "400", message: "data is required" })
         //if hash is provided, check if it already exists 

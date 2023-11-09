@@ -1,8 +1,10 @@
-require('dotenv').config()
+require("dotenv").config({ path: "../.env" });
 const { providers, utils, } = require('ethers')
 const fs = require('fs/promises')
 
 const TEMP_HASH_LIST_JSON_NAME = 'hash.json'
+
+console.log(process.env.OPTIMISM_API_KEY)
 
 const NETWORK_CONFIG = {
 	'optimism-mainnet': {
@@ -10,6 +12,7 @@ const NETWORK_CONFIG = {
 		name: 'optimism'
 	}
 }
+console.log(NETWORK_CONFIG)
 
 const ABI_MAP = {
 	workspace: 'QBWorkspaceRegistryContract',
@@ -38,6 +41,7 @@ const IPFS_HASH_KEYS = [
 
 // ref: https://github.com/questbook/subgraph/blob/main/scripts/reupload-ipfs-files.js
 async function getIpfsHashes(contractName, network, contractAddress) {
+	
 	const config = require(`./${network}.json`)
 	contractAddress = contractAddress || config[contractName].address
 
@@ -45,12 +49,11 @@ async function getIpfsHashes(contractName, network, contractAddress) {
 	const abiJson = require(`./abis/${abiJsonName}.json`)
 	const abi = new utils.Interface(abiJson)
 
-	const provider = new providers.EtherscanProvider(
-		NETWORK_CONFIG[network].name,
-		NETWORK_CONFIG[network].apiKey
-	)
+	const provider = new providers.AlchemyProvider(NETWORK_CONFIG[network].name,
+		NETWORK_CONFIG[network].apiKey)
 
 	const history = await fetchAllLogs()
+	
 
 	const hashes = new Set()
 	const newGrantAddresses = new Set()
@@ -89,16 +92,18 @@ async function getIpfsHashes(contractName, network, contractAddress) {
 	return { hashes, newGrantAddresses }
 
 	async function fetchAllLogs() {
-		let fromBlock
+		let fromBlock 
 		let logs = []
-		do {
-			const history = await provider.getLogs({
-				address: contractAddress,
-				fromBlock
-			})
-			logs.push(...history)
-			fromBlock = history[history.length - 1]?.blockNumber + 1
-		} while(fromBlock)
+		const history = await provider.getLogs({
+			address: contractAddress,
+			fromBlock: 'earliest'
+		})
+		console.log(`got ${history.length} ${contractName} logs`)
+		logs.push(...history)
+		// first block 
+		fromBlock = history[0].blockNumber + 1
+		
+		console.log(`fetching ${contractName} logs from block ${fromBlock}`)
 
 		console.log(`got ${logs.length} ${contractName} logs`)
 		
@@ -110,7 +115,7 @@ async function getIpfsHashes(contractName, network, contractAddress) {
 async function main() {
 	const hashes = await extractHashes()
 	const hashesSize = hashes.size || hashes.length
-	console.log(`got ${hashesSize} hashes, uploading to ipfs`)
+	console.log(`got ${hashesSize} hashes`)
 
 	
 

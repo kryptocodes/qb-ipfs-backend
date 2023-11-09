@@ -1,6 +1,3 @@
-
-
-
 import morgan from "morgan";
 import dotenv from "dotenv";
 dotenv.config();
@@ -11,15 +8,14 @@ import cors from 'cors';
 
 import routes from './routes'
 import './db'
-import logger from "./utils/logger";
 
 const app = express()
-const port = process.env.PORT
 
-app.use(cors())
+app.use(cors());
 
-
+if(process.env.NODE_ENV === "development"){
 app.use(morgan("dev"));
+}
 
 
 /* health check */
@@ -33,8 +29,4 @@ app.get('/health/check', (_, res) => {
 app.use("/",routes)
 
 
-app.listen(port, () => {
-logger.info(`QB app listening on port ${port}`)
-})
-
-export default app;
+export default app

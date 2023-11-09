@@ -2,14 +2,15 @@
   "name": "questbook-ipfs-backend",
   "version": "1.0.0",
   "description": "questbook ipfs backend",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "sh -c 'while true; do node dist/index.js; done'",
+    "start": "sh -c 'while true; do node dist/server.js; done'",
     "build": "tsc",
     "watch-tsc": "tsc -w",
-    "deploy": "node dist/index.js",
-    "watch-deploy": "nodemon dist/index.js",
-    "dev": "concurrently \"npm run watch-tsc\" \"npm run watch-deploy\""
+    "deploy": "node dist/server.js",
+    "watch-deploy": "nodemon dist/server.js",
+    "dev": "concurrently \"npm run watch-tsc\" \"npm run watch-deploy\"",
+    "test": "jest --verbose --detectOpenHandles --forceExit"
   },
   "keywords": [],
   "author": "",
