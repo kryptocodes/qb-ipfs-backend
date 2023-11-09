@@ -1,82 +1,79 @@
-import { Request, Response } from 'express';
-import { s3Upload } from '../utils/s3Uploader';
+
+import { uploadBlob } from '../utils/s3Uploader';
 import logger from '../utils/logger';
-import { v4 as uuidv4 } from 'uuid';
 import { findHash,putData } from '../services';
 
 
 /* 
-upload: store json in mongodb
-@params: data
+upload: edge case if hash is not found in dB but exist in ipfs 
+@params: data, hash
 @returns:  status, message, and hash of the stored data
 */
 
-const uploadToDB = async (req: Request, res: Response) => {
+
+
+const uploadToDB = async (hash:string,data: string | object | any) => {
     try {
-        let { data,hash } = req.body;
-        if (!data) return res.status(400).json({ status: "400", message: "data is required" })
-        //if hash is provided, check if it already exists 
-         data = JSON?.parse(data) ? JSON?.parse(data) : data
-        if(hash && hash.length > 0){
-            const duplicateCheck = await findHash(hash);
-            if(duplicateCheck){
-                return res.status(400).json({ status: "400", message: "hash already exists" })
-            }
-        }
-            const uploadToDB = await putData(hash?.length > 0 ? hash : uuidv4(), data)
-            if(!uploadToDB) return res.status(400).json({ status: "400", message: "upload failed" })
-            return res.status(200).json({
-                status: "200",
-                message: "data stored successfully",
-                hash: uploadToDB?.hash,
-            })
-           
+        const hashCheck = await findHash(hash);
+        if(hashCheck) return false;
+        const uploadToDB = await putData(hash, data);
+        return uploadToDB;
     }
     catch (error) {
-       console.log(error)
-        return res.status(500).json({
-            status: "500",
-            message: error?.message || "internal server error"
-        })
+      logger.error(error)
+      return false;
+       
     }
 }
 
-const uploadFiletoDB = async (req: Request | any, res: Response) => {
-    try {
-        const { data } = req.files;
-        const { hash } = req.body;
-       if(!data) return res.status(400).json({ status: "400", message: "data is required" })
-        //if hash is provided, check if it already exists 
-        if(hash && hash[0].length > 0){
-            const duplicateCheck = await findHash(hash[0]);
-            if(duplicateCheck){
-                return res.status(400).json({ status: "400", message: "hash already exists" })
-            }
+
+const mediaTypes = ["image", "video", "audio", "application/pdf"];
+const checkHashExist = async(hash:string) => {
+    try{
+        // abort request if it takes more than 5 seconds
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const check = await fetch(`https://ipfs.questbook.app:8080/ipfs/${hash}`,{ signal: controller.signal });
+        clearTimeout(timeoutId);
+        // if hash not found in ipfs return false
+        if(check?.status !== 200) {
+            return false;
         }
-            const cid: any = await s3Upload(data[0])
-            if (!cid || !cid.Location) { return res.status(400).json({ status: "400", message: "upload failed" }) }
-            const uploadToDB = await putData(hash && hash[0]?.length > 0 ? hash[0] : uuidv4(), cid.Location)
-            return res.status(200).json({
-                status: "200",
-                message: "data stored successfully",
-                hash: uploadToDB?.hash,
-            })
-       
+        if(!check) return false;
+        const contentType = await check?.headers.get("content-type");
+        if(contentType?.startsWith("application/json")) {
+            const json = await check?.json();
+            const jsonData = await uploadToDB(hash, json);
+            return jsonData;
+        }  else if (mediaTypes.some((type) => contentType?.includes(type))) {
+            const blob = await check.blob();
+         const fileName = hash + "." + contentType?.split("/")[1];
+            const file = new File([blob], fileName, {
+                type: contentType!,
+                lastModified: Date.now(),
+         });
+          const cid = await uploadBlob(file,fileName);
+         if (!cid) return false;
+         const cidData = await uploadToDB(hash, cid?.Location);
+         return cidData;
+    } else {
+        const text = await check.text();
+        const textData = await uploadToDB(hash, text);
+        return textData;
     }
-    catch (error) {
+    }
+    catch(error){
         logger.error(error)
-        return res.status(500).json({
-            status: "500",
-            message: error?.message || "internal server error"
-        })
+        return false;
     }
 }
+
 
 
 
 
 
 export {
-    uploadToDB,
-    uploadFiletoDB
+    checkHashExist,
+    uploadToDB
 }

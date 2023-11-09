@@ -21,9 +21,9 @@ const connectToMongoDB = async () => {
             dbName: process.env.MONGODB_DBNAME,
         });
         logger.info(`Connected to mongo database: ${process.env.MONGODB_DBNAME}`);
-        mongoose.set("debug", (collectionName, method, query, doc) => {
-            logger.info(`${collectionName}.${method}`, JSON.stringify(query), doc);
-        });
+        // mongoose.set("debug", (collectionName, method, query, doc) => {
+        //     logger.info(`${collectionName}.${method}`, JSON.stringify(query), doc);
+        // });
         return connection;
     } catch (err) {
         logger.error(err);

@@ -81,7 +81,9 @@ async function main() {
   } else {
     console.log("no hashes");
   }
-  const regex = /(Qm[a-zA-Z0-9]{44}|bafy[0-9a-f]{50})/g;
+  const regex = new RegExp(
+    "Qm[1-9A-HJ-NP-Za-km-z]{44,}|b[A-Za-z2-7]{58,}|B[A-Z2-7]{58,}|z[1-9A-HJ-NP-Za-km-z]{48,}|F[0-9A-F]{50,}"
+  );
   function isIPFSHash(value) {
     return regex.test(value);
   }

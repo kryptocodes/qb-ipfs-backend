@@ -7,7 +7,7 @@ const s3Upload = async (file,fileName) => {
         const s3 = new S3Client();
         const params = {
             Bucket: process.env.AWS_BUCKET_NAME,
-            Key: `ipfs/${fileName}`,
+            Key: `files/${fileName}`,
             Body: file,
         };
         const s3Upload = new Upload({
